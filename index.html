@@ -174,6 +174,16 @@
         .config-row input[type="number"] { width: 75px; margin: 0; text-align: center; font-weight: bold; }
         .config-row input[type="checkbox"] { transform: scale(1.4); margin-left: 10px; accent-color: #4361ee; }
         .team-setup-buttons { display: flex; gap: 10px; }
+
+        /* Placeholder styling for faint team names */
+        .team-name-input::placeholder {
+            color: #adb5bd;
+            opacity: 1; /* keep consistent across browsers */
+            font-weight: 600;
+        }
+        .team-name-input {
+            color: #495057; /* typed text stays normal color */
+        }
     </style>
 </head>
 <body>
@@ -181,7 +191,7 @@
     <!-- PANTALLA DE INICIO -->
     <div id="home-screen" class="screen active">
         <h1>🥗 Ensaladera</h1>
-        <p style="color: #6c757d; margin-bottom: 30px;">El clásico juego de adivinar palabras.</p>
+        <p style="color: #6c757d; margin-bottom: 30px;">Como lo jugó el coro Navegantes en el viaje a Uruguay del 2026</p>
         
         <button id="btn-resume" class="warning" style="display: none; margin-bottom: 25px; padding: 20px; font-size: 1.2em;" onclick="resumeGame()">⚠️ Reanudar Partida en Curso</button>
         
@@ -216,8 +226,8 @@
         <hr>
         <h3>Equipos Jugando</h3>
         <div id="team-setup-container">
-            <input type="text" class="team-name-input" value="Equipo 1">
-            <input type="text" class="team-name-input" value="Equipo 2">
+            <input type="text" class="team-name-input" placeholder="Equipo 1" value="">
+            <input type="text" class="team-name-input" placeholder="Equipo 2" value="">
         </div>
         <div class="team-setup-buttons">
             <button class="secondary" onclick="addLobbyTeam()" style="background: #f8f9fa; color: #4361ee; box-shadow: none;">+ Equipo</button>
@@ -360,7 +370,8 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'team-name-input';
-        input.value = "Equipo " + (container.children.length + 1);
+        input.placeholder = "Equipo " + (container.children.length + 1);
+        input.value = "";
         container.appendChild(input);
     }
 
@@ -482,7 +493,10 @@
         window.database.ref('rooms/' + roomCode + '/words').off(); 
 
         const teamInputs = document.querySelectorAll('.team-name-input');
-        teams = Array.from(teamInputs).map(input => ({ name: input.value.trim() || "Equipo", score: 0 }));
+        teams = Array.from(teamInputs).map((input, i) => ({
+            name: input.value.trim() || input.placeholder || ("Equipo " + (i+1)),
+            score: 0
+        }));
         
         turnTimeLimit = parseInt(document.getElementById('time-limit-input').value) || 60;
         allowSkip = document.getElementById('allow-skip-input').checked;
