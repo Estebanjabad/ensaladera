@@ -185,7 +185,7 @@
         <button id="btn-resume" class="warning" style="display: none; margin-bottom: 25px; padding: 20px; font-size: 1.2em;" onclick="resumeLocalGame()">⚠️ Reanudar Partida Local</button>
         
         <button onclick="createRoom()">Crear Partida (Anfitrión)</button>
-        <button class="secondary" onclick="showScreen('join-screen')">Unirse (Jugador)</button>
+        <button class="secondary" onclick="goToJoinScreen()">Unirse (Jugador)</button>
 
         <hr style="margin: 35px 0 25px 0;">
         <h3 style="font-size: 0.9em; margin-bottom: 10px;">¿Se apagó el teléfono del anfitrión?</h3>
@@ -195,17 +195,28 @@
 
     <div id="join-screen" class="screen">
         <h1>Unirse a Partida</h1>
-        <input type="text" id="join-code" placeholder="CÓDIGO DE SALA" maxlength="4" style="text-transform:uppercase; text-align: center; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">
         
-        <div id="word-inputs" style="margin-top: 20px;">
-            <input type="text" class="player-word" placeholder="Palabra 1">
-            <input type="text" class="player-word" placeholder="Palabra 2">
-            <input type="text" class="player-word" placeholder="Palabra 3">
+        <div id="join-step-1">
+            <input type="text" id="join-code" placeholder="CÓDIGO DE SALA" maxlength="4" style="text-transform:uppercase; text-align: center; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">
+            <button class="success" onclick="verifyJoinCode()" style="margin-top: 25px;">Siguiente</button>
+            <button class="secondary" onclick="showScreen('home-screen')" style="background: transparent; color: #6c757d; box-shadow: none;">Volver al Inicio</button>
         </div>
-        
-        <button class="secondary" onclick="addWordInput()" style="background: transparent; color: #4361ee; border: 2px dashed #4361ee; box-shadow: none;">+ Añadir Palabra</button>
-        <button class="success" onclick="submitWords()" style="margin-top: 25px;">Enviar Palabras</button>
-        <button class="secondary" onclick="showScreen('home-screen')" style="background: transparent; color: #6c757d; box-shadow: none;">Volver al Inicio</button>
+
+        <div id="join-step-2" style="display: none;">
+            <div style="background: #e8f5e9; color: #2a9d8f; padding: 10px; border-radius: 10px; font-weight: bold; margin-bottom: 20px;">
+                Sala: <span id="display-joined-code" style="letter-spacing: 2px; font-size: 1.2em;"></span>
+            </div>
+            
+            <div id="word-inputs">
+                <input type="text" class="player-word" placeholder="Palabra 1">
+                <input type="text" class="player-word" placeholder="Palabra 2">
+                <input type="text" class="player-word" placeholder="Palabra 3">
+            </div>
+            
+            <button class="secondary" onclick="addWordInput()" style="background: transparent; color: #4361ee; border: 2px dashed #4361ee; box-shadow: none;">+ Más Palabras</button>
+            <button class="success" onclick="submitWords()" style="margin-top: 25px;">Enviar Palabras</button>
+            <button class="secondary" onclick="resetJoinScreen()" style="background: transparent; color: #6c757d; box-shadow: none;">Atrás</button>
+        </div>
     </div>
 
     <div id="lobby-screen" class="screen">
@@ -232,7 +243,7 @@
             <input type="text" class="host-word" placeholder="Palabra 1">
             <input type="text" class="host-word" placeholder="Palabra 2">
         </div>
-        <button class="secondary" onclick="addHostWordInput()" style="background: transparent; color: #4361ee; border: 2px dashed #4361ee; box-shadow: none;">+ Añadir Palabra</button>
+        <button class="secondary" onclick="addHostWordInput()" style="background: transparent; color: #4361ee; border: 2px dashed #4361ee; box-shadow: none;">+ Más palabras</button>
         <button id="btn-host-submit" onclick="submitHostWords()">Enviar a la olla</button>
 
         <hr>
@@ -370,10 +381,31 @@
         });
     }
 
-    // --- 3. NAVEGACIÓN ---
+    // --- 3. NAVEGACIÓN Y JOIN ---
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
+    }
+
+    function goToJoinScreen() {
+        document.getElementById('join-code').value = '';
+        document.getElementById('join-step-1').style.display = 'block';
+        document.getElementById('join-step-2').style.display = 'none';
+        showScreen('join-screen');
+    }
+
+    function verifyJoinCode() {
+        const code = document.getElementById('join-code').value.trim().toUpperCase();
+        if (code.length !== 4) return alert("Por favor ingresa un código válido de 4 letras.");
+        
+        document.getElementById('display-joined-code').innerText = code;
+        document.getElementById('join-step-1').style.display = 'none';
+        document.getElementById('join-step-2').style.display = 'block';
+    }
+
+    function resetJoinScreen() {
+        document.getElementById('join-step-1').style.display = 'block';
+        document.getElementById('join-step-2').style.display = 'none';
     }
 
     // --- 4. CONFIGURACIÓN DE EQUIPOS EN LOBBY ---
@@ -477,7 +509,7 @@
     function submitWords() {
         if (!window.database) return;
         const code = document.getElementById('join-code').value.toUpperCase();
-        if (!code) return alert("Ingresa el código.");
+        if (!code) return alert("Error con el código de sala.");
         const inputs = document.querySelectorAll('.player-word');
         const words = Array.from(inputs).map(input => input.value.trim()).filter(val => val !== "");
         if (words.length === 0) return alert("Ingresa al menos una palabra.");
