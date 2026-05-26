@@ -174,32 +174,25 @@
         .config-row input[type="number"] { width: 75px; margin: 0; text-align: center; font-weight: bold; }
         .config-row input[type="checkbox"] { transform: scale(1.4); margin-left: 10px; accent-color: #4361ee; }
         .team-setup-buttons { display: flex; gap: 10px; }
-
-        /* Placeholder styling for faint team names */
-        .team-name-input::placeholder {
-            color: #adb5bd;
-            opacity: 1; /* keep consistent across browsers */
-            font-weight: 600;
-        }
-        .team-name-input {
-            color: #495057; /* typed text stays normal color */
-        }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO -->
     <div id="home-screen" class="screen active">
         <h1>🥗 Ensaladera</h1>
-        <p style="color: #6c757d; margin-bottom: 30px;">Como lo jugó el coro Navegantes en el viaje a Uruguay del 2026</p>
+        <p style="color: #6c757d; margin-bottom: 30px;">El clásico juego de adivinar palabras.</p>
         
-        <button id="btn-resume" class="warning" style="display: none; margin-bottom: 25px; padding: 20px; font-size: 1.2em;" onclick="resumeGame()">⚠️ Reanudar Partida en Curso</button>
+        <button id="btn-resume" class="warning" style="display: none; margin-bottom: 25px; padding: 20px; font-size: 1.2em;" onclick="resumeLocalGame()">⚠️ Reanudar Partida Local</button>
         
         <button onclick="createRoom()">Crear Partida (Anfitrión)</button>
         <button class="secondary" onclick="showScreen('join-screen')">Unirse (Jugador)</button>
+
+        <hr style="margin: 35px 0 25px 0;">
+        <h3 style="font-size: 0.9em; margin-bottom: 10px;">¿Se apagó el teléfono del anfitrión?</h3>
+        <input type="text" id="recover-code" placeholder="CÓDIGO DE SALA" maxlength="4" style="text-transform:uppercase; text-align: center; font-weight: bold; font-size: 1.1em; letter-spacing: 2px;">
+        <button class="warning" onclick="recoverFromCloud()" style="margin-top: 10px; background: #f4a261;">☁️ Recuperar de la Nube</button>
     </div>
 
-    <!-- PANTALLA DE JUGADOR (UNIRSE) -->
     <div id="join-screen" class="screen">
         <h1>Unirse a Partida</h1>
         <input type="text" id="join-code" placeholder="CÓDIGO DE SALA" maxlength="4" style="text-transform:uppercase; text-align: center; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">
@@ -215,7 +208,6 @@
         <button class="secondary" onclick="showScreen('home-screen')" style="background: transparent; color: #6c757d; box-shadow: none;">Volver al Inicio</button>
     </div>
 
-    <!-- PANTALLA DEL ANFITRIÓN (LOBBY) -->
     <div id="lobby-screen" class="screen">
         <h3>Código de Sala</h3>
         <h1 id="display-room-code" style="font-size: 4.5em; color: #4361ee; letter-spacing: 6px; margin: 10px 0;">ABCD</h1>
@@ -226,8 +218,8 @@
         <hr>
         <h3>Equipos Jugando</h3>
         <div id="team-setup-container">
-            <input type="text" class="team-name-input" placeholder="Equipo 1" value="">
-            <input type="text" class="team-name-input" placeholder="Equipo 2" value="">
+            <input type="text" class="team-name-input" placeholder="Equipo 1">
+            <input type="text" class="team-name-input" placeholder="Equipo 2">
         </div>
         <div class="team-setup-buttons">
             <button class="secondary" onclick="addLobbyTeam()" style="background: #f8f9fa; color: #4361ee; box-shadow: none;">+ Equipo</button>
@@ -257,17 +249,14 @@
         <button class="success" style="padding: 22px; font-size: 1.3em; margin-top: 30px;" onclick="startGame()">¡Comenzar Juego!</button>
     </div>
 
-    <!-- PANTALLA DE ESPERA (JUGADORES) -->
     <div id="waiting-screen" class="screen">
         <h1 style="font-size: 4em; margin-bottom: 0;">🥗</h1>
         <h1>¡Palabras Enviadas!</h1>
         <p style="color: #6c757d; font-size: 1.1em;">Guarda tu teléfono. El juego está por comenzar en la pantalla del anfitrión.</p>
     </div>
 
-    <!-- PANTALLA DE JUEGO (ANFITRIÓN) -->
     <div id="game-screen" class="screen">
         
-        <!-- Título de Ronda Prominente -->
         <div>
             <div id="round-display" class="round-badge">1. Definición</div>
         </div>
@@ -278,7 +267,6 @@
         
         <div class="timer" id="timer-display">60</div>
         
-        <!-- Tarjeta de la Palabra -->
         <div class="word-display" id="current-word">???</div>
         
         <button id="btn-main" onclick="handleMainAction()">Iniciar Turno</button>
@@ -291,7 +279,6 @@
         
         <button id="btn-undo" onclick="handleUndo()">↩️ Deshacer palabra correcta</button>
 
-        <!-- Marcador Compacto Inferior -->
         <div id="scoreboard-container"></div>
     </div>
 
@@ -310,18 +297,24 @@
     const roundNames = ["1. Definición", "2. Mímica", "3. Una Palabra"];
     let gameState = "WAITING"; 
     
-    // Variables de Equipos y Puntuación
     let teams = [];
     let currentTeamIndex = 0;
     let wordsScoredThisTurn = 0;
 
-    // --- 2. LOCAL STORAGE (AUTO-GUARDADO) ---
+    // --- 2. LOCAL & CLOUD STORAGE ---
     function saveProgress() {
         const gameData = {
             roomCode, wordPool, turnTimeLimit, allowSkip, timeLeft,
-            currentWordIndex, currentRoundIndex, gameState, teams, currentTeamIndex
+            currentWordIndex, currentRoundIndex, gameState, teams, currentTeamIndex, wordsScoredThisTurn
         };
+        
+        // 1. Guardado Local (Respaldo)
         localStorage.setItem('ensaladera_save', JSON.stringify(gameData));
+        
+        // 2. Guardado en la Nube (Cloud Save)
+        if (window.database && roomCode) {
+            window.database.ref('rooms/' + roomCode + '/save').set(gameData);
+        }
     }
 
     function checkSavedGame() {
@@ -330,12 +323,9 @@
         }
     }
 
-    function resumeGame() {
-        const savedData = JSON.parse(localStorage.getItem('ensaladera_save'));
-        if (!savedData) return;
-        
+    function loadGameData(savedData) {
         roomCode = savedData.roomCode;
-        wordPool = savedData.wordPool;
+        wordPool = savedData.wordPool || [];
         turnTimeLimit = savedData.turnTimeLimit;
         allowSkip = savedData.allowSkip;
         timeLeft = savedData.timeLeft;
@@ -344,8 +334,7 @@
         gameState = savedData.gameState;
         teams = savedData.teams || [];
         currentTeamIndex = savedData.currentTeamIndex || 0;
-        
-        wordsScoredThisTurn = 0; 
+        wordsScoredThisTurn = savedData.wordsScoredThisTurn || 0;
         
         renderScoreboard();
         showScreen('game-screen');
@@ -355,6 +344,30 @@
         } else {
             setGameState(gameState);
         }
+    }
+
+    function resumeLocalGame() {
+        const savedData = JSON.parse(localStorage.getItem('ensaladera_save'));
+        if (!savedData) return;
+        loadGameData(savedData);
+    }
+
+    function recoverFromCloud() {
+        const code = document.getElementById('recover-code').value.toUpperCase();
+        if (!code) return alert("Ingresa el código de 4 letras.");
+        if (!window.database) return alert("¡Base de datos no conectada!");
+
+        window.database.ref('rooms/' + code + '/save').once('value').then((snapshot) => {
+            const cloudData = snapshot.val();
+            if (!cloudData) return alert("No se encontró ninguna partida guardada en la nube con este código.");
+            
+            // Reclamamos el rol de anfitrión
+            localStorage.setItem('ensaladera_save', JSON.stringify(cloudData));
+            loadGameData(cloudData);
+        }).catch(error => {
+            console.error(error);
+            alert("Hubo un error al intentar recuperar la partida.");
+        });
     }
 
     // --- 3. NAVEGACIÓN ---
@@ -370,8 +383,8 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'team-name-input';
+        // Usar placeholder en lugar de value
         input.placeholder = "Equipo " + (container.children.length + 1);
-        input.value = "";
         container.appendChild(input);
     }
 
@@ -490,12 +503,27 @@
 
     function startGame() {
         if (wordPool.length === 0) return alert("¡La olla está vacía!");
+        
         window.database.ref('rooms/' + roomCode + '/words').off(); 
 
+        let uniqueWords = [];
+        let seen = new Set();
+        wordPool.forEach(w => {
+            let normalized = w.trim().toLowerCase();
+            if(!seen.has(normalized)) {
+                seen.add(normalized);
+                uniqueWords.push(w); 
+            }
+        });
+        wordPool = uniqueWords;
+
+        if (wordPool.length === 0) return alert("¡No hay palabras válidas!");
+
+        // Toma el valor ingresado, o el placeholder, o crea un nombre por defecto
         const teamInputs = document.querySelectorAll('.team-name-input');
-        teams = Array.from(teamInputs).map((input, i) => ({
-            name: input.value.trim() || input.placeholder || ("Equipo " + (i+1)),
-            score: 0
+        teams = Array.from(teamInputs).map((input, index) => ({ 
+            name: input.value.trim() || input.placeholder || `Equipo ${index + 1}`, 
+            score: 0 
         }));
         
         turnTimeLimit = parseInt(document.getElementById('time-limit-input').value) || 60;
@@ -530,7 +558,7 @@
         const wordDisplay = document.getElementById('current-word');
 
         updateGameUI();
-        saveProgress();
+        saveProgress(); 
 
         if (newState === 'PLAYING') {
             btnSkip.style.display = allowSkip ? 'inline-block' : 'none';
@@ -610,6 +638,7 @@
             wordDisplay.innerText = "¡JUEGO TERMINADO!";
             btnMain.innerText = "Volver al Menú Principal";
             btnMain.className = "primary";
+            
             window.database.ref('rooms/' + roomCode).remove();
             localStorage.removeItem('ensaladera_save');
         }
