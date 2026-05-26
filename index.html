@@ -193,15 +193,18 @@
         <button class="warning" onclick="recoverFromCloud()" style="margin-top: 10px; background: #f4a261;">☁️ Recuperar de la Nube</button>
     </div>
 
+    <!-- PANTALLA DE JUGADOR (UNIRSE EN DOS PASOS) -->
     <div id="join-screen" class="screen">
         <h1>Unirse a Partida</h1>
         
+        <!-- PASO 1: INGRESAR CÓDIGO -->
         <div id="join-step-1">
             <input type="text" id="join-code" placeholder="CÓDIGO DE SALA" maxlength="4" style="text-transform:uppercase; text-align: center; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">
             <button class="success" onclick="verifyJoinCode()" style="margin-top: 25px;">Siguiente</button>
             <button class="secondary" onclick="showScreen('home-screen')" style="background: transparent; color: #6c757d; box-shadow: none;">Volver al Inicio</button>
         </div>
 
+        <!-- PASO 2: INGRESAR PALABRAS -->
         <div id="join-step-2" style="display: none;">
             <div style="background: #e8f5e9; color: #2a9d8f; padding: 10px; border-radius: 10px; font-weight: bold; margin-bottom: 20px;">
                 Sala: <span id="display-joined-code" style="letter-spacing: 2px; font-size: 1.2em;"></span>
@@ -533,6 +536,36 @@
         }
     }
 
+    // Función para reproducir el pitido del cronómetro usando código nativo
+    function playTimeUpSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioContext();
+            
+            function beep(time, freq, dur) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = freq;
+                // Volumen bajito para que no asuste
+                gain.gain.setValueAtTime(1.0, time);
+                gain.gain.linearRampToValueAtTime(1.0, time + dur);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(time);
+                osc.stop(time + dur);
+            }
+
+            const now = ctx.currentTime;
+            // Tres pitidos rápidos estilo alarma deportiva
+            beep(now, 400, 0.2);
+            beep(now + 0.3, 400, 0.2);
+            beep(now + 0.6, 300, 0.6); 
+        } catch(e) {
+            console.error("No se pudo reproducir el audio", e);
+        }
+    }
+
     function startGame() {
         if (wordPool.length === 0) return alert("¡La olla está vacía!");
         
@@ -640,6 +673,7 @@
             wordDisplay.innerText = "¡TIEMPO!";
             btnMain.innerText = "Pasar Teléfono";
             btnMain.className = "danger";
+            playTimeUpSound(); // Reproduce el sonido de la chicharra
         }
         else if (newState === 'WRONG_GUESS') {
             clearInterval(timerInterval);
