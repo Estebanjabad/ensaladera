@@ -8,38 +8,172 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; text-align: center; background: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        .screen { display: none; max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* Estilos Globales Modernizados */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%); 
+            color: #2b2d42; 
+            margin: 0; 
+            padding: 20px; 
+            min-height: 100vh;
+        }
+        .screen { 
+            display: none; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 35px 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        }
         .active { display: block; }
-        h1 { font-size: 2em; margin-bottom: 20px; }
-        h3 { color: #555; margin-bottom: 10px; }
-        input[type="text"], input[type="number"] { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         
-        button { background: #007bff; color: white; border: none; padding: 15px 20px; width: 100%; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-        button:hover { background: #0056b3; }
-        button.secondary { background: #6c757d; }
-        button.success { background: #28a745; }
-        button.danger { background: #dc3545; }
-        button.warning { background: #ffc107; color: #333; }
-        button:disabled { background: #ccc; cursor: not-allowed; color: #666; }
+        h1 { font-size: 2.2em; margin-bottom: 25px; color: #1d3557; font-weight: 800; }
+        h2 { color: #457b9d; }
+        h3 { color: #6c757d; margin-bottom: 12px; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Botón de juego unificado gigante */
-        #btn-main { height: 100px; font-size: 1.5em; margin-top: 20px; text-transform: uppercase; box-shadow: 0 6px 0 rgba(0,0,0,0.2); transition: all 0.1s; }
-        #btn-main:active { transform: translateY(6px); box-shadow: none; }
+        input[type="text"], input[type="number"] { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 8px 0; 
+            border: 2px solid #e9ecef; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #4361ee;
+            outline: none;
+        }
+        
+        /* Botones Base */
+        button { 
+            background: #4361ee; 
+            color: white; 
+            border: none; 
+            padding: 16px 20px; 
+            width: 100%; 
+            border-radius: 14px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            margin-top: 12px; 
+            font-weight: bold; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3); }
+        button:active { transform: translateY(1px); box-shadow: none; }
+        
+        button.secondary { background: #6c757d; box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2); }
+        button.success { background: #2a9d8f; box-shadow: 0 4px 6px rgba(42, 157, 143, 0.2); }
+        button.danger { background: #e63946; box-shadow: 0 4px 6px rgba(230, 57, 70, 0.2); }
+        button.warning { background: #f4a261; color: white; box-shadow: 0 4px 6px rgba(244, 162, 97, 0.2); }
+        button:disabled { background: #ced4da; cursor: not-allowed; color: #6c757d; box-shadow: none; transform: none; }
+        
+        /* Botón Principal de Juego */
+        #btn-main { 
+            height: 90px; 
+            font-size: 1.4em; 
+            margin-top: 15px; 
+            text-transform: uppercase; 
+            border-radius: 20px;
+            letter-spacing: 1px;
+        }
 
-        /* Botones extra de acciones (Saltar / Error) */
+        /* Botones de acción extra */
         .action-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
-        #btn-skip { display: none; flex: 1; }
-        #btn-wrong { display: none; flex: 1; font-size: 14px; padding: 10px; background: #c82333; color: white; border: 2px solid #a71d2a; }
+        .action-buttons button { flex: 1; font-size: 14px; padding: 12px 8px; display: none; margin-top: 0; border-radius: 10px; box-shadow: none; }
+        #btn-skip { background: #e9ecef; color: #495057; border: 1px solid #ced4da; }
+        #btn-wrong { background: #fff0f1; color: #e63946; border: 1px solid #ffc9ce; }
+        #btn-end-turn { background: #e63946; color: white; border: none; }
+        #btn-undo { display: none; background: transparent; color: #6c757d; margin-top: 15px; font-size: 14px; padding: 10px; border: 1px dashed #ced4da; box-shadow: none; }
 
-        .word-display { font-size: 3.5em; font-weight: bold; margin: 30px 0; text-transform: uppercase; color: #007bff; min-height: 100px; display: flex; align-items: center; justify-content: center;}
-        .timer { font-size: 3.5em; font-weight: bold; color: #dc3545; margin: 10px 0; }
-        .stats { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; color: #555; background: #e9ecef; padding: 10px; border-radius: 8px;}
-        hr { margin: 30px 0; border: 0; border-top: 1px solid #eee; }
+        /* Elementos del Juego */
+        .round-badge {
+            background: #1d3557;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 1.3em;
+            font-weight: 800;
+            display: inline-block;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(29, 53, 87, 0.2);
+        }
+
+        .word-display { 
+            font-size: 3.2em; 
+            font-weight: 900; 
+            margin: 20px 0; 
+            text-transform: uppercase; 
+            color: #2b2d42; 
+            min-height: 120px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            padding: 10px 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 8px 16px rgba(0,0,0,0.04);
+            word-break: break-word;
+        }
         
-        .config-row { display: flex; align-items: center; justify-content: space-between; margin: 15px 0; font-weight: bold; font-size: 1.1em; text-align: left; padding: 0 10px; }
-        .config-row input[type="number"] { width: 70px; margin: 0; text-align: center; }
-        .config-row input[type="checkbox"] { transform: scale(1.5); margin-left: 10px; }
+        .timer { font-size: 4em; font-weight: 900; color: #e63946; margin: 10px 0; line-height: 1; }
+        
+        .stats { 
+            font-size: 1.1em; 
+            font-weight: bold; 
+            color: #6c757d; 
+            margin-bottom: 10px; 
+        }
+        
+        /* Marcador de Equipos */
+        #scoreboard-container { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center; 
+            margin-top: 30px; 
+            border-top: 2px dashed #e9ecef; 
+            padding-top: 20px; 
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+        }
+        .team-box { 
+            flex: 1; 
+            min-width: 65px; 
+            max-width: 120px; 
+            background: #f8f9fa; 
+            padding: 10px 5px; 
+            border-radius: 12px; 
+            border: 2px solid transparent; 
+            text-align: center; 
+            transition: all 0.3s ease;
+        }
+        .team-box.active-turn { 
+            border-color: #2a9d8f; 
+            background: #f0fdfa; 
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(42, 157, 143, 0.15); 
+        }
+        .team-box h4 { margin: 0 0 5px 0; font-size: 0.85em; color: #6c757d; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .team-box.active-turn h4 { color: #2a9d8f; font-weight: bold; }
+        
+        .score-row { display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .score-val { font-size: 1.6em; font-weight: 900; color: #2b2d42; margin: 0; }
+        .edit-btn { background: none; border: none; font-size: 1.1em; padding: 0; cursor: pointer; color: #adb5bd; width: auto; margin: 0; box-shadow: none; }
+        .edit-btn:hover { color: #495057; transform: none; }
+        
+        /* Layout del Lobby */
+        hr { margin: 30px 0; border: 0; border-top: 2px solid #f1f3f5; }
+        .config-row { display: flex; align-items: center; justify-content: space-between; margin: 15px 0; font-weight: 600; font-size: 1.1em; text-align: left; padding: 0 5px; color: #495057; }
+        .config-row input[type="number"] { width: 75px; margin: 0; text-align: center; font-weight: bold; }
+        .config-row input[type="checkbox"] { transform: scale(1.4); margin-left: 10px; accent-color: #4361ee; }
+        .team-setup-buttons { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
@@ -47,78 +181,108 @@
     <!-- PANTALLA DE INICIO -->
     <div id="home-screen" class="screen active">
         <h1>🥗 Ensaladera</h1>
+        <p style="color: #6c757d; margin-bottom: 30px;">El clásico juego de adivinar palabras.</p>
+        
+        <button id="btn-resume" class="warning" style="display: none; margin-bottom: 25px; padding: 20px; font-size: 1.2em;" onclick="resumeGame()">⚠️ Reanudar Partida en Curso</button>
+        
         <button onclick="createRoom()">Crear Partida (Anfitrión)</button>
         <button class="secondary" onclick="showScreen('join-screen')">Unirse (Jugador)</button>
     </div>
 
     <!-- PANTALLA DE JUGADOR (UNIRSE) -->
     <div id="join-screen" class="screen">
-        <h1>Unirse a la Partida</h1>
-        <input type="text" id="join-code" placeholder="Código de 4 Letras" maxlength="4" style="text-transform:uppercase">
-        <div id="word-inputs">
+        <h1>Unirse a Partida</h1>
+        <input type="text" id="join-code" placeholder="CÓDIGO DE SALA" maxlength="4" style="text-transform:uppercase; text-align: center; font-weight: bold; font-size: 1.2em; letter-spacing: 2px;">
+        
+        <div id="word-inputs" style="margin-top: 20px;">
             <input type="text" class="player-word" placeholder="Palabra 1">
             <input type="text" class="player-word" placeholder="Palabra 2">
             <input type="text" class="player-word" placeholder="Palabra 3">
         </div>
-        <button onclick="addWordInput()">+ Agregar Otra Palabra</button>
-        <button class="success" onclick="submitWords()">Enviar Palabras</button>
-        <button class="secondary" onclick="showScreen('home-screen')">Volver</button>
+        
+        <button class="secondary" onclick="addWordInput()" style="background: transparent; color: #4361ee; border: 2px dashed #4361ee; box-shadow: none;">+ Añadir Palabra</button>
+        <button class="success" onclick="submitWords()" style="margin-top: 25px;">Enviar Palabras</button>
+        <button class="secondary" onclick="showScreen('home-screen')" style="background: transparent; color: #6c757d; box-shadow: none;">Volver al Inicio</button>
     </div>
 
     <!-- PANTALLA DEL ANFITRIÓN (LOBBY) -->
     <div id="lobby-screen" class="screen">
-        <h2>Código de Sala:</h2>
-        <h1 id="display-room-code" style="font-size: 4em; color: #007bff; letter-spacing: 5px;">ABCD</h1>
-        <h2 id="word-count" style="color: #28a745;">Palabras en la Olla: 0</h2>
+        <h3>Código de Sala</h3>
+        <h1 id="display-room-code" style="font-size: 4.5em; color: #4361ee; letter-spacing: 6px; margin: 10px 0;">ABCD</h1>
+        <div style="background: #e8f5e9; color: #2a9d8f; padding: 10px; border-radius: 10px; font-weight: bold; margin-bottom: 20px;">
+            <span id="word-count">0</span> palabras en la olla
+        </div>
         
         <hr>
-        <h3>Tus Palabras (Anfitrión):</h3>
+        <h3>Equipos Jugando</h3>
+        <div id="team-setup-container">
+            <input type="text" class="team-name-input" value="Equipo 1">
+            <input type="text" class="team-name-input" value="Equipo 2">
+        </div>
+        <div class="team-setup-buttons">
+            <button class="secondary" onclick="addLobbyTeam()" style="background: #f8f9fa; color: #4361ee; box-shadow: none;">+ Equipo</button>
+            <button class="danger" onclick="removeLobbyTeam()" style="background: #fff0f1; color: #e63946; box-shadow: none;">- Equipo</button>
+        </div>
+
+        <hr>
+        <h3>Tus Palabras</h3>
         <div id="host-word-inputs">
             <input type="text" class="host-word" placeholder="Palabra 1">
             <input type="text" class="host-word" placeholder="Palabra 2">
-            <input type="text" class="host-word" placeholder="Palabra 3">
         </div>
-        <button class="secondary" onclick="addHostWordInput()">+ Agregar Otra Palabra</button>
-        <button id="btn-host-submit" onclick="submitHostWords()">Enviar Mis Palabras</button>
+        <button class="secondary" onclick="addHostWordInput()" style="background: transparent; color: #4361ee; border: 2px dashed #4361ee; box-shadow: none;">+ Añadir Palabra</button>
+        <button id="btn-host-submit" onclick="submitHostWords()">Enviar a la olla</button>
 
         <hr>
-        <h3>Configuración de Partida:</h3>
-        
+        <h3>Reglas</h3>
         <div class="config-row">
-            <label for="time-limit-input">Tiempo por turno (seg):</label>
+            <label>Segundos por turno:</label>
             <input type="number" id="time-limit-input" value="60" min="10" max="120">
         </div>
-        
         <div class="config-row">
-            <label for="allow-skip-input">Permitir saltar palabras:</label>
+            <label>Permitir botón "Saltar":</label>
             <input type="checkbox" id="allow-skip-input">
         </div>
 
-        <button class="danger" style="padding: 20px; font-size: 1.2em; margin-top: 20px;" onclick="startGame()">¡Comenzar Juego!</button>
+        <button class="success" style="padding: 22px; font-size: 1.3em; margin-top: 30px;" onclick="startGame()">¡Comenzar Juego!</button>
     </div>
 
     <!-- PANTALLA DE ESPERA (JUGADORES) -->
     <div id="waiting-screen" class="screen">
+        <h1 style="font-size: 4em; margin-bottom: 0;">🥗</h1>
         <h1>¡Palabras Enviadas!</h1>
-        <p>Mira la pantalla del Anfitrión. El juego comenzará pronto.</p>
+        <p style="color: #6c757d; font-size: 1.1em;">Guarda tu teléfono. El juego está por comenzar en la pantalla del anfitrión.</p>
     </div>
 
     <!-- PANTALLA DE JUEGO (ANFITRIÓN) -->
     <div id="game-screen" class="screen">
+        
+        <!-- Título de Ronda Prominente -->
+        <div>
+            <div id="round-display" class="round-badge">1. Definición</div>
+        </div>
+        
         <div class="stats">
-            <span id="round-display">1. Definición</span>
-            <span id="words-left-display">Restantes: 0</span>
+            <span id="words-left-display">Palabras restantes: 0</span>
         </div>
         
         <div class="timer" id="timer-display">60</div>
+        
+        <!-- Tarjeta de la Palabra -->
         <div class="word-display" id="current-word">???</div>
         
         <button id="btn-main" onclick="handleMainAction()">Iniciar Turno</button>
-
+        
         <div class="action-buttons">
-            <button id="btn-skip" class="warning" onclick="handleSkip()">Saltar</button>
-            <button id="btn-wrong" onclick="handleWrongGuess()">Adivinaron Mal</button>
+            <button id="btn-skip" onclick="handleSkip()">Saltar</button>
+            <button id="btn-wrong" onclick="handleWrongGuess()">Error</button>
+            <button id="btn-end-turn" onclick="handleEndTurn()">Terminar Turno</button>
         </div>
+        
+        <button id="btn-undo" onclick="handleUndo()">↩️ Deshacer palabra correcta</button>
+
+        <!-- Marcador Compacto Inferior -->
+        <div id="scoreboard-container"></div>
     </div>
 
 <script>
@@ -126,25 +290,121 @@
     let roomCode = "";
     let wordPool = [];
     
-    // Variables de configuración y máquina de estados
     let turnTimeLimit = 60;
-    let allowSkip = true;
+    let allowSkip = false;
     let timeLeft = 60;
     let timerInterval;
+    
     let currentWordIndex = 0;
     let currentRoundIndex = 0;
     const roundNames = ["1. Definición", "2. Mímica", "3. Una Palabra"];
-    let gameState = "WAITING"; // WAITING, PLAYING, TIME_UP, WRONG_GUESS, ROUND_END, GAME_OVER
+    let gameState = "WAITING"; 
+    
+    // Variables de Equipos y Puntuación
+    let teams = [];
+    let currentTeamIndex = 0;
+    let wordsScoredThisTurn = 0;
 
-    // --- 2. NAVEGACIÓN ---
+    // --- 2. LOCAL STORAGE (AUTO-GUARDADO) ---
+    function saveProgress() {
+        const gameData = {
+            roomCode, wordPool, turnTimeLimit, allowSkip, timeLeft,
+            currentWordIndex, currentRoundIndex, gameState, teams, currentTeamIndex
+        };
+        localStorage.setItem('ensaladera_save', JSON.stringify(gameData));
+    }
+
+    function checkSavedGame() {
+        if (localStorage.getItem('ensaladera_save')) {
+            document.getElementById('btn-resume').style.display = 'block';
+        }
+    }
+
+    function resumeGame() {
+        const savedData = JSON.parse(localStorage.getItem('ensaladera_save'));
+        if (!savedData) return;
+        
+        roomCode = savedData.roomCode;
+        wordPool = savedData.wordPool;
+        turnTimeLimit = savedData.turnTimeLimit;
+        allowSkip = savedData.allowSkip;
+        timeLeft = savedData.timeLeft;
+        currentWordIndex = savedData.currentWordIndex;
+        currentRoundIndex = savedData.currentRoundIndex;
+        gameState = savedData.gameState;
+        teams = savedData.teams || [];
+        currentTeamIndex = savedData.currentTeamIndex || 0;
+        
+        wordsScoredThisTurn = 0; 
+        
+        renderScoreboard();
+        showScreen('game-screen');
+        
+        if (gameState === 'PLAYING') {
+            setGameState('WAITING'); 
+        } else {
+            setGameState(gameState);
+        }
+    }
+
+    // --- 3. NAVEGACIÓN ---
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
     }
 
-    // --- 3. LÓGICA DEL LOBBY ---
+    // --- 4. CONFIGURACIÓN DE EQUIPOS EN LOBBY ---
+    function addLobbyTeam() {
+        const container = document.getElementById('team-setup-container');
+        if (container.children.length >= 6) return alert("Máximo 6 equipos recomendados.");
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'team-name-input';
+        input.value = "Equipo " + (container.children.length + 1);
+        container.appendChild(input);
+    }
+
+    function removeLobbyTeam() {
+        const container = document.getElementById('team-setup-container');
+        if (container.children.length <= 2) return alert("Mínimo 2 equipos para jugar.");
+        container.removeChild(container.lastChild);
+    }
+
+    // --- 5. MARCADOR Y PUNTUACIÓN MANUAL ---
+    function renderScoreboard() {
+        const container = document.getElementById('scoreboard-container');
+        container.innerHTML = "";
+        
+        teams.forEach((team, index) => {
+            const isActive = index === currentTeamIndex ? "active-turn" : "";
+            const box = document.createElement('div');
+            box.className = `team-box ${isActive}`;
+            box.innerHTML = `
+                <h4>${team.name}</h4>
+                <div class="score-row">
+                    <span class="score-val">${team.score}</span>
+                    <button class="edit-btn" onclick="editScore(${index})">✏️</button>
+                </div>
+            `;
+            container.appendChild(box);
+        });
+    }
+
+    function editScore(index) {
+        const team = teams[index];
+        const newScore = prompt(`Editar puntos para ${team.name}:`, team.score);
+        
+        if (newScore !== null && !isNaN(newScore) && newScore !== "") {
+            team.score = parseInt(newScore);
+            renderScoreboard();
+            saveProgress();
+        }
+    }
+
+    // --- 6. LÓGICA DE INGRESO DE PALABRAS ---
     function createRoom() {
         if (!window.database) return alert("¡Base de datos no conectada!");
+        localStorage.removeItem('ensaladera_save'); 
         
         roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
         document.getElementById('display-room-code').innerText = roomCode;
@@ -153,7 +413,7 @@
             const data = snapshot.val();
             if (data) {
                 wordPool = Object.values(data);
-                document.getElementById('word-count').innerText = "Palabras en la Olla: " + wordPool.length;
+                document.getElementById('word-count').innerText = wordPool.length;
             }
         });
         showScreen('lobby-screen');
@@ -161,22 +421,19 @@
 
     function addHostWordInput() {
         const inputs = document.getElementById('host-word-inputs');
-        const inputCount = inputs.children.length + 1;
-        const newInput = document.createElement('input');
-        newInput.type = "text";
-        newInput.className = "host-word";
-        newInput.placeholder = "Palabra " + inputCount;
-        inputs.appendChild(newInput);
+        const input = document.createElement('input');
+        input.type = "text";
+        input.className = "host-word";
+        input.placeholder = "Palabra " + (inputs.children.length + 1);
+        inputs.appendChild(input);
     }
 
     function submitHostWords() {
-        if (!window.database) return alert("¡Base de datos no conectada!");
+        if (!window.database) return;
         const inputs = document.querySelectorAll('.host-word');
         const words = Array.from(inputs).map(input => input.value.trim()).filter(val => val !== "");
         if (words.length === 0) return alert("Ingresa al menos una palabra.");
-
         words.forEach(word => window.database.ref('rooms/' + roomCode + '/words').push(word));
-
         inputs.forEach(input => input.value = "");
         const btn = document.getElementById('btn-host-submit');
         btn.innerText = "¡Enviadas!";
@@ -186,28 +443,25 @@
 
     function addWordInput() {
         const inputs = document.getElementById('word-inputs');
-        const inputCount = inputs.children.length + 1;
-        const newInput = document.createElement('input');
-        newInput.type = "text";
-        newInput.className = "player-word";
-        newInput.placeholder = "Palabra " + inputCount;
-        inputs.appendChild(newInput);
+        const input = document.createElement('input');
+        input.type = "text";
+        input.className = "player-word";
+        input.placeholder = "Palabra " + (inputs.children.length + 1);
+        inputs.appendChild(input);
     }
 
     function submitWords() {
-        if (!window.database) return alert("¡Base de datos no conectada!");
+        if (!window.database) return;
         const code = document.getElementById('join-code').value.toUpperCase();
         if (!code) return alert("Ingresa el código.");
-
         const inputs = document.querySelectorAll('.player-word');
         const words = Array.from(inputs).map(input => input.value.trim()).filter(val => val !== "");
         if (words.length === 0) return alert("Ingresa al menos una palabra.");
-
         words.forEach(word => window.database.ref('rooms/' + code + '/words').push(word));
         showScreen('waiting-screen');
     }
 
-    // --- 4. LÓGICA DEL JUEGO (MÁQUINA DE ESTADOS) ---
+    // --- 7. LÓGICA DEL JUEGO Y ESTADOS ---
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -215,27 +469,42 @@
         }
     }
 
+    function shuffleRemainingWords() {
+        if (currentWordIndex < wordPool.length - 1) {
+            const remaining = wordPool.slice(currentWordIndex);
+            shuffle(remaining);
+            wordPool = [...wordPool.slice(0, currentWordIndex), ...remaining];
+        }
+    }
+
     function startGame() {
         if (wordPool.length === 0) return alert("¡La olla está vacía!");
-        window.database.ref('rooms/' + roomCode + '/words').off(); // Desconectar base de datos
+        window.database.ref('rooms/' + roomCode + '/words').off(); 
 
-        // Leer configuraciones
+        const teamInputs = document.querySelectorAll('.team-name-input');
+        teams = Array.from(teamInputs).map(input => ({ name: input.value.trim() || "Equipo", score: 0 }));
+        
         turnTimeLimit = parseInt(document.getElementById('time-limit-input').value) || 60;
         allowSkip = document.getElementById('allow-skip-input').checked;
         
         timeLeft = turnTimeLimit;
         currentRoundIndex = 0;
         currentWordIndex = 0;
+        currentTeamIndex = 0;
+        wordsScoredThisTurn = 0;
+        
         shuffle(wordPool);
-
         showScreen('game-screen');
         setGameState('WAITING');
     }
 
     function updateGameUI() {
         document.getElementById('round-display').innerText = roundNames[currentRoundIndex] || "";
-        document.getElementById('words-left-display').innerText = "Restantes: " + (wordPool.length - currentWordIndex);
+        document.getElementById('words-left-display').innerText = "Palabras restantes: " + (wordPool.length - currentWordIndex);
         document.getElementById('timer-display').innerText = timeLeft;
+        renderScoreboard();
+        
+        document.getElementById('btn-undo').style.display = (wordsScoredThisTurn > 0) ? 'inline-block' : 'none';
     }
 
     function setGameState(newState) {
@@ -243,24 +512,29 @@
         const btnMain = document.getElementById('btn-main');
         const btnSkip = document.getElementById('btn-skip');
         const btnWrong = document.getElementById('btn-wrong');
+        const btnEndTurn = document.getElementById('btn-end-turn');
         const wordDisplay = document.getElementById('current-word');
 
         updateGameUI();
+        saveProgress();
 
-        // Controlar visibilidad de botones extra solo si estamos jugando
         if (newState === 'PLAYING') {
             btnSkip.style.display = allowSkip ? 'inline-block' : 'none';
-            // Ronda 3 = índice 2
-            btnWrong.style.display = (currentRoundIndex === 2) ? 'inline-block' : 'none';
+            btnWrong.style.display = (currentRoundIndex === 2) ? 'inline-block' : 'none'; 
+            btnEndTurn.style.display = 'inline-block';
         } else {
             btnSkip.style.display = 'none';
             btnWrong.style.display = 'none';
+            btnEndTurn.style.display = 'none';
         }
 
         if (newState === 'WAITING') {
             clearInterval(timerInterval);
+            wordsScoredThisTurn = 0; 
+            document.getElementById('btn-undo').style.display = 'none'; 
+            
             wordDisplay.innerText = "¿Listos?";
-            btnMain.innerText = "▶️ Iniciar Turno";
+            btnMain.innerText = `▶️ Inicia: ${teams[currentTeamIndex].name}`;
             btnMain.className = "success";
         }
         else if (newState === 'PLAYING') {
@@ -269,13 +543,23 @@
             btnMain.className = "secondary";
             
             clearInterval(timerInterval);
+            const endTime = Date.now() + (timeLeft * 1000);
+            let currentSecond = timeLeft;
+            
             timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer-display').innerText = timeLeft;
+                timeLeft = Math.ceil((endTime - Date.now()) / 1000);
+                if (timeLeft < 0) timeLeft = 0;
+                
+                if (timeLeft !== currentSecond) {
+                    currentSecond = timeLeft;
+                    document.getElementById('timer-display').innerText = timeLeft;
+                    saveProgress();
+                }
+                
                 if (timeLeft <= 0) {
                     setGameState('TIME_UP');
                 }
-            }, 1000);
+            }, 200);
         }
         else if (newState === 'TIME_UP') {
             clearInterval(timerInterval);
@@ -289,6 +573,12 @@
             btnMain.innerText = "Pasar Teléfono";
             btnMain.className = "danger";
         }
+        else if (newState === 'END_TURN') {
+            clearInterval(timerInterval);
+            wordDisplay.innerText = "¡TURNO TERMINADO!";
+            btnMain.innerText = "Pasar Teléfono";
+            btnMain.className = "danger";
+        }
         else if (newState === 'ROUND_END') {
             clearInterval(timerInterval);
             wordDisplay.innerText = "¡FIN DE RONDA!";
@@ -297,7 +587,7 @@
             if (currentRoundIndex >= 3) {
                 setGameState('GAME_OVER');
             } else {
-                btnMain.innerText = "Empezar: " + roundNames[currentRoundIndex];
+                btnMain.innerText = `Empezar: ${roundNames[currentRoundIndex]}`;
                 btnMain.className = "warning";
             }
         }
@@ -306,33 +596,43 @@
             wordDisplay.innerText = "¡JUEGO TERMINADO!";
             btnMain.innerText = "Volver al Menú Principal";
             btnMain.className = "primary";
+            window.database.ref('rooms/' + roomCode).remove();
+            localStorage.removeItem('ensaladera_save');
         }
     }
 
-    // --- 5. ACCIONES DE BOTONES DE JUEGO ---
+    // --- 8. ACCIONES DURANTE EL JUEGO ---
     function handleMainAction() {
         if (gameState === 'WAITING') {
             setGameState('PLAYING');
         }
         else if (gameState === 'PLAYING') {
+            teams[currentTeamIndex].score++;
+            wordsScoredThisTurn++;
             currentWordIndex++;
+            
             if (currentWordIndex >= wordPool.length) {
                 setGameState('ROUND_END');
             } else {
                 document.getElementById('current-word').innerText = wordPool[currentWordIndex];
                 updateGameUI();
+                saveProgress();
             }
         }
-        else if (gameState === 'TIME_UP' || gameState === 'WRONG_GUESS') {
+        else if (gameState === 'TIME_UP' || gameState === 'WRONG_GUESS' || gameState === 'END_TURN') {
+            currentTeamIndex = (currentTeamIndex + 1) % teams.length;
             timeLeft = turnTimeLimit; 
+            shuffleRemainingWords();
             setGameState('WAITING');
         }
         else if (gameState === 'ROUND_END') {
             shuffle(wordPool);
             currentWordIndex = 0;
+            
             if (timeLeft > 0) {
                 setGameState('PLAYING');
             } else {
+                currentTeamIndex = (currentTeamIndex + 1) % teams.length;
                 timeLeft = turnTimeLimit;
                 setGameState('WAITING');
             }
@@ -342,19 +642,32 @@
         }
     }
 
+    function handleUndo() {
+        if (wordsScoredThisTurn <= 0) return; 
+
+        wordsScoredThisTurn--;
+        currentWordIndex--;
+        teams[currentTeamIndex].score--;
+
+        if (gameState === 'ROUND_END') {
+            currentRoundIndex--; 
+            setGameState('PLAYING');
+        } else {
+            document.getElementById('current-word').innerText = wordPool[currentWordIndex];
+            updateGameUI();
+            saveProgress();
+        }
+    }
+
     function handleSkip() {
         if (gameState !== 'PLAYING') return;
         const wordsLeft = wordPool.length - currentWordIndex;
-        
-        // Solo podemos saltar si hay más de una palabra en la olla para cambiar
         if (wordsLeft > 1) {
-            // Sacar la palabra actual de su lugar y mandarla al final de la olla
             const skippedWord = wordPool.splice(currentWordIndex, 1)[0];
             wordPool.push(skippedWord);
-            
-            // Actualizar la pantalla
             document.getElementById('current-word').innerText = wordPool[currentWordIndex];
             updateGameUI();
+            saveProgress();
         }
     }
 
@@ -363,7 +676,12 @@
         setGameState('WRONG_GUESS');
     }
 
-    // --- 6. CONFIGURACIÓN DE FIREBASE ---
+    function handleEndTurn() {
+        if (gameState !== 'PLAYING') return;
+        setGameState('END_TURN');
+    }
+
+    // --- 9. INICIALIZACIÓN ---
     try {
         const firebaseConfig = {
             apiKey: "AIzaSyCEwxWMvydTVsZnMH-GfEpCNa5wJDV9H4c",
@@ -374,13 +692,13 @@
             messagingSenderId: "490057604724",
             appId: "1:490057604724:web:4904658157c1fefa58bb21"
         };
-
         firebase.initializeApp(firebaseConfig);
         window.database = firebase.database();
     } catch (error) {
-        console.error("ERROR DE FIREBASE:", error);
-        alert("No se pudo conectar a Firebase. Revisa los bloqueadores de anuncios.");
+        console.error("ERROR:", error);
     }
+
+    window.onload = checkSavedGame;
 </script>
 </body>
 </html>
