@@ -705,7 +705,7 @@
             btnMain.innerText = "Volver al Menú Principal";
             btnMain.className = "primary";
             
-            window.database.ref('rooms/' + roomCode).remove();
+            // Database cleanup removed: room data is preserved after game end.
             localStorage.removeItem('ensaladera_save');
         }
     }
@@ -811,3 +811,4 @@
 </script>
 </body>
 </html>
+
